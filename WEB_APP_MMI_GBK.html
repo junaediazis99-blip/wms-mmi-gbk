@@ -132,8 +132,27 @@
 
       <!-- Quick Role Switcher for Testing -->
       <div class="mt-6 pt-5 border-t border-slate-100">
-        <p class="text-[11px] font-bold text-slate-400 text-center mb-2.5">"Aplikasi ini khusus untuk di gudang bahan kemas PT MMI":</p>
+        <p class="text-[11px] font-bold text-slate-400 text-center mb-2.5">Pilih Akun Demo / Uji Coba Quick Login:</p>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <button type="button" onclick="quickLogin('superadmin', 'admin123')" class="px-3 py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 font-semibold rounded-xl text-slate-600 border border-slate-200 transition text-left flex items-center justify-between">
+            <span>Superadmin</span>
+            <i class="fas fa-user-shield text-brand-600 text-xs"></i>
+          </button>
+          <button type="button" onclick="quickLogin('manager', 'mgr123')" class="px-3 py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 font-semibold rounded-xl text-slate-600 border border-slate-200 transition text-left flex items-center justify-between">
+            <span>Manager</span>
+            <i class="fas fa-user-tie text-brand-600 text-xs"></i>
+          </button>
+          <button type="button" onclick="quickLogin('spv', 'spv123')" class="px-3 py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 font-semibold rounded-xl text-slate-600 border border-slate-200 transition text-left flex items-center justify-between">
+            <span>Supervisor</span>
+            <i class="fas fa-user-check text-brand-600 text-xs"></i>
+          </button>
+          <button type="button" onclick="quickLogin('staff', 'staff123')" class="px-3 py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 font-semibold rounded-xl text-slate-600 border border-slate-200 transition text-left flex items-center justify-between">
+            <span>Staff Gudang</span>
+            <i class="fas fa-user text-brand-600 text-xs"></i>
+          </button>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -1451,14 +1470,15 @@
     // Salin konfigurasi dari Firebase Console: Project Settings > General > Your apps
     // =========================================================================
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  apiKey: "AIzaSyANf5kAhsPXK1WVpBgGDZamuoxJzjffrj0",
+  authDomain: "wms-mmi-gbk.firebaseapp.com",
+  databaseURL: "https://wms-mmi-gbk-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wms-mmi-gbk",
+  storageBucket: "wms-mmi-gbk.firebasestorage.app",
+  messagingSenderId: "599063931296",
+  appId: "1:599063931296:web:24d749d8cedbe01c991cc5",
+  measurementId: "G-K6CEP23HX0"
+};
 
     // Inisialisasi Firebase jika CDN SDK dimuat dan valid
     let db = null;
@@ -1621,12 +1641,19 @@
     }
 
     let appDB = JSON.parse(localStorage.getItem('WMS_MMI_DB')) || DEFAULT_DATA;
-    if (!appDB.kategoriBarang || !Array.isArray(appDB.kategoriBarang) || appDB.kategoriBarang.length === 0) {
-      appDB.kategoriBarang = DEFAULT_DATA.kategoriBarang.slice();
-    }
+    if (!appDB.users || !Array.isArray(appDB.users) || appDB.users.length === 0) appDB.users = DEFAULT_DATA.users.slice();
+    if (!appDB.barang || !Array.isArray(appDB.barang) || appDB.barang.length === 0) appDB.barang = DEFAULT_DATA.barang.slice();
+    if (!appDB.suplier || !Array.isArray(appDB.suplier)) appDB.suplier = DEFAULT_DATA.suplier.slice();
+    if (!appDB.lokasi || !Array.isArray(appDB.lokasi)) appDB.lokasi = DEFAULT_DATA.lokasi.slice();
+    if (!appDB.kategoriBarang || !Array.isArray(appDB.kategoriBarang) || appDB.kategoriBarang.length === 0) appDB.kategoriBarang = DEFAULT_DATA.kategoriBarang.slice();
+    if (!appDB.penerimaan || !Array.isArray(appDB.penerimaan)) appDB.penerimaan = DEFAULT_DATA.penerimaan.slice();
+    if (!appDB.pengeluaran || !Array.isArray(appDB.pengeluaran)) appDB.pengeluaran = DEFAULT_DATA.pengeluaran.slice();
+    if (!appDB.logs || !Array.isArray(appDB.logs)) appDB.logs = DEFAULT_DATA.logs.slice();
+
     let currentUser = JSON.parse(localStorage.getItem('WMS_MMI_USER')) || null;
     let myChart1 = null;
     let myChart2 = null;
+
 
     function saveDB() {
       localStorage.setItem('WMS_MMI_DB', JSON.stringify(appDB));
