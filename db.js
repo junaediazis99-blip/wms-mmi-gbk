@@ -39,7 +39,7 @@
   const firebaseConfig = {
   apiKey: "AIzaSyCZlkmamTnheqvj4InXNYy5hhyKqOMv3j8",
   authDomain: "gbk-wms-mmi.firebaseapp.com",
-  databaseURL: "https://console.firebase.google.com/project/gbk-wms-mmi/database/gbk-wms-mmi-default-rtdb/data/~2F", // <-- GANTI dengan URL asli project Anda dari Firebase Console
+  databaseURL: "https://gbk-wms-mmi-default-rtdb.asia-southeast1.firebasedatabase.app/", // <-- GANTI dengan URL asli project Anda dari Firebase Console
   projectId: "gbk-wms-mmi",
   storageBucket: "gbk-wms-mmi.firebasestorage.app",
   messagingSenderId: "457943014631",
