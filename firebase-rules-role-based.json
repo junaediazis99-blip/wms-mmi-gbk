@@ -1,0 +1,54 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "roles": {
+      ".read": "auth != null",
+      ".write": false
+    },
+
+    "wms_data": {
+
+      "kategoriBarang": {
+        ".read": "auth != null",
+        ".write": "root.child('roles').child(auth.uid).val() === 'manager' || root.child('roles').child(auth.uid).val() === 'superadmin'"
+      },
+
+      "users": {
+        ".read": "root.child('roles').child(auth.uid).val() === 'superadmin' || root.child('roles').child(auth.uid).val() === 'manager'",
+        ".write": "root.child('roles').child(auth.uid).val() === 'superadmin'"
+      },
+
+      "barang": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('roles').child(auth.uid).exists()"
+      },
+
+      "suplier": {
+        ".read": "auth != null",
+        ".write": "root.child('roles').child(auth.uid).val() === 'supervisor' || root.child('roles').child(auth.uid).val() === 'manager' || root.child('roles').child(auth.uid).val() === 'superadmin'"
+      },
+
+      "lokasi": {
+        ".read": "auth != null",
+        ".write": "root.child('roles').child(auth.uid).val() === 'supervisor' || root.child('roles').child(auth.uid).val() === 'manager' || root.child('roles').child(auth.uid).val() === 'superadmin'"
+      },
+
+      "penerimaan": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('roles').child(auth.uid).exists()"
+      },
+
+      "pengeluaran": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('roles').child(auth.uid).exists()"
+      },
+
+      "logs": {
+        ".read": "root.child('roles').child(auth.uid).val() === 'supervisor' || root.child('roles').child(auth.uid).val() === 'manager' || root.child('roles').child(auth.uid).val() === 'superadmin'",
+        ".write": "auth != null && root.child('roles').child(auth.uid).exists()"
+      }
+    }
+  }
+}
