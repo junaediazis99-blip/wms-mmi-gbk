@@ -1490,6 +1490,13 @@
     }
 
     // ================= INITIALIZATION =================
+    // Penangkap error otomatis - kalau ada error JS apapun, tampilkan pop-up
+    // supaya masalah langsung kelihatan tanpa perlu buka DevTools/Console.
+    window.onerror = function(message, source, lineno, colno, error) {
+      alert('TERJADI ERROR PADA APLIKASI:\n\n' + message + '\n\nBaris: ' + lineno + ':' + colno + (error && error.stack ? ('\n\nDetail:\n' + error.stack) : ''));
+      return false;
+    };
+
     window.addEventListener('DOMContentLoaded', () => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const dateEl = document.getElementById('currentDateDisplay');
@@ -1563,6 +1570,7 @@
 
     function handleLogin(e) {
       e.preventDefault();
+      try {
       const u = document.getElementById('loginUsername').value.trim();
       const p = document.getElementById('loginPassword').value.trim();
 
@@ -1585,6 +1593,9 @@
         // Log LOGIN cukup tersimpan lokal & akan ikut terkirim saat ada aksi CRUD berikutnya.
       } else {
         showToast('Username atau password salah!', 'error');
+      }
+      } catch (err) {
+        alert('ERROR saat proses login:\n\n' + err.message + '\n\nDetail:\n' + err.stack);
       }
     }
 
