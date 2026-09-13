@@ -295,6 +295,11 @@
 
         <!-- ================= TAB 1: DASHBOARD ================= -->
         <section id="sec-dashboard" class="space-y-6">
+          <div class="flex items-center justify-end">
+            <button onclick="printLaporanDashboard()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i class="fas fa-file-pdf"></i> Cetak Laporan Dashboard
+            </button>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
               <div>
@@ -1941,6 +1946,114 @@
       if (subtitleEl) {
         subtitleEl.textContent = `${labelKat.length} kategori · ${totalStokAll.toLocaleString('id-ID')} unit`;
       }
+    }
+
+    // ================= CETAK LAPORAN DASHBOARD (Resume + Rincian Stok Kritis + Grafik) =================
+    function printLaporanDashboard() {
+      document.getElementById('previewModalTitle').textContent = `Cetak Laporan Dashboard`;
+
+      // --- RESUME: hitung ulang angka-angka yang sama seperti kartu di Dashboard ---
+      const totalBarang = appDB.barang.length;
+      const lowStockItems = appDB.barang.filter(b => b.stok <= b.minStok);
+      const approvedIn = appDB.penerimaan.filter(p => p.status === 'Disetujui');
+      const approvedOut = appDB.pengeluaran.filter(p => p.status === 'Disetujui');
+      const rejectedCount = appDB.penerimaan.filter(p => p.status === 'Ditolak').length +
+                             appDB.pengeluaran.filter(p => p.status === 'Ditolak').length;
+      const pendingCount = appDB.penerimaan.filter(p => p.status === 'Menunggu Persetujuan').length +
+                           appDB.pengeluaran.filter(p => p.status === 'Menunggu Persetujuan').length;
+      const totalDecided = approvedIn.length + approvedOut.length + rejectedCount;
+      const approvalRate = totalDecided > 0 ? Math.round(((approvedIn.length + approvedOut.length) / totalDecided) * 100) : 100;
+
+      let totalItemsHandled = 0;
+      approvedIn.forEach(doc => doc.items.forEach(it => totalItemsHandled += it.qtyTerima));
+      approvedOut.forEach(doc => doc.items.forEach(it => totalItemsHandled += it.qtyKeluar));
+
+      // --- Ambil gambar grafik yang sedang tampil di Dashboard (kalau sedang aktif) ---
+      const chartTrenImg = myChart1 ? myChart1.toBase64Image() : null;
+      const chartKatImg = myChart2 ? myChart2.toBase64Image() : null;
+
+      const cardResume = (label, value, colorClass) => `
+        <div class="border border-slate-300 rounded-lg p-3 text-center">
+          <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">${label}</p>
+          <p class="text-xl font-black ${colorClass} mt-1">${value}</p>
+        </div>`;
+
+      const rincianRows = lowStockItems.length > 0
+        ? lowStockItems.map(b => `
+          <tr>
+            <td class="p-2 font-mono">${b.kode}</td>
+            <td class="p-2">${b.nama}</td>
+            <td class="p-2">${b.kategori}</td>
+            <td class="p-2 text-right font-bold text-rose-600">${b.stok.toLocaleString('id-ID')}</td>
+            <td class="p-2 text-right">${b.minStok.toLocaleString('id-ID')}</td>
+            <td class="p-2">${b.lokasi || '-'}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="6" class="p-3 text-center text-slate-400">Tidak ada item di bawah stok minimum saat ini.</td></tr>`;
+
+      const html = `
+        <div class="border-b-2 border-slate-900 pb-3 mb-5 flex items-center justify-between">
+          <div>
+            <h1 class="text-base font-black text-slate-900">PT MONARCH MULTI INDUSTRI</h1>
+            <p class="text-[10px] text-slate-600">Laporan Dashboard Gudang Bahan Kemas</p>
+          </div>
+          <div class="text-right">
+            <h2 class="text-sm font-black uppercase text-brand-900">LAPORAN STOK KRITIS & PRODUKTIVITAS</h2>
+            <p class="font-mono text-xs text-slate-700">Dicetak: ${new Date().toLocaleString('id-ID')}</p>
+          </div>
+        </div>
+
+        <h3 class="text-xs font-black uppercase text-slate-700 mb-2 tracking-wide">Resume / Ringkasan</h3>
+        <div class="grid grid-cols-4 gap-3 mb-6">
+          ${cardResume('Total Item', totalBarang, 'text-slate-800')}
+          ${cardResume('Stok Kritis', lowStockItems.length, 'text-rose-600')}
+          ${cardResume('Pending Persetujuan', pendingCount, 'text-amber-600')}
+          ${cardResume('Approval Rate', approvalRate + '%', 'text-emerald-600')}
+          ${cardResume('Volume Throughput', totalItemsHandled.toLocaleString('id-ID') + ' Pcs', 'text-brand-700')}
+          ${cardResume('LPB Disetujui', approvedIn.length, 'text-emerald-600')}
+          ${cardResume('SBPB Disetujui', approvedOut.length, 'text-emerald-600')}
+          ${cardResume('Dokumen Ditolak', rejectedCount, 'text-rose-500')}
+        </div>
+
+        ${(chartTrenImg || chartKatImg) ? `
+        <h3 class="text-xs font-black uppercase text-slate-700 mb-2 tracking-wide">Grafik Produktivitas</h3>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          ${chartTrenImg ? `<div class="border border-slate-200 rounded-lg p-2"><p class="text-[9px] font-bold text-slate-500 mb-1 text-center">Tren Transaksi Mingguan (LPB vs SBPB)</p><img src="${chartTrenImg}" style="width:100%;"></div>` : ''}
+          ${chartKatImg ? `<div class="border border-slate-200 rounded-lg p-2"><p class="text-[9px] font-bold text-slate-500 mb-1 text-center">Proporsi Kategori Bahan Kemas</p><img src="${chartKatImg}" style="width:100%;"></div>` : ''}
+        </div>` : ''}
+
+        <h3 class="text-xs font-black uppercase text-slate-700 mb-2 tracking-wide">Rincian Item Stok Kritis / Menipis</h3>
+        <table class="w-full text-left text-[10px] border border-slate-300 mb-8">
+          <thead class="bg-slate-100 font-bold border-b border-slate-300">
+            <tr>
+              <th class="p-2">Kode</th>
+              <th class="p-2">Nama Bahan Kemas</th>
+              <th class="p-2">Kategori</th>
+              <th class="p-2 text-right">Stok Saat Ini</th>
+              <th class="p-2 text-right">Min. Stok</th>
+              <th class="p-2">Lokasi</th>
+            </tr>
+          </thead>
+          <tbody>${rincianRows}</tbody>
+        </table>
+
+        <div class="grid grid-cols-3 gap-4 text-center text-xs mt-10 pt-4">
+          <div>
+            <p class="font-semibold text-slate-600 mb-12">Staff</p>
+            <p class="font-bold border-t border-slate-400 mx-6 pt-1">( ................................ )</p>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-600 mb-12">Manager</p>
+            <p class="font-bold border-t border-slate-400 mx-6 pt-1">( ................................ )</p>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-600 mb-12">Direktur</p>
+            <p class="font-bold border-t border-slate-400 mx-6 pt-1">( ................................ )</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('documentRenderContent').innerHTML = html;
+      openModal('modalPreviewDoc');
     }
 
     // ================= KARTU STOK =================
