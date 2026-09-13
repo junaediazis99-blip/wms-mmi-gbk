@@ -13,6 +13,8 @@
   <!-- Firebase SDK (Realtime Database) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <!-- SheetJS (baca/tulis file Excel di browser, untuk fitur Impor & Template) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -629,6 +631,13 @@
               <button onclick="openModalKategoriManager()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
                 <i class="fas fa-tags"></i> Kelola Kategori
               </button>
+              <button onclick="downloadTemplateBarang()" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                <i class="fas fa-file-arrow-down"></i> Unduh Template
+              </button>
+              <label class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                <i class="fas fa-file-import"></i> Impor Excel
+                <input type="file" accept=".xlsx,.xls" class="hidden" onchange="handleImportBarang(event)">
+              </label>
               <button onclick="openModalBarang()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                 <i class="fas fa-plus"></i> Tambah Item
               </button>
@@ -667,6 +676,13 @@
               <p class="text-xs text-slate-400">Daftar vendor penyedia botol, percetakan kemasan, stiker, dan karton.</p>
             </div>
             <div class="flex items-center gap-2">
+              <button onclick="downloadTemplateSuplier()" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                <i class="fas fa-file-arrow-down"></i> Unduh Template
+              </button>
+              <label class="role-staff-hide px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                <i class="fas fa-file-import"></i> Impor Excel
+                <input type="file" accept=".xlsx,.xls" class="hidden" onchange="handleImportSuplier(event)">
+              </label>
               <button onclick="openModalSuplier()" class="role-staff-hide px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                 <i class="fas fa-plus"></i> Tambah Suplier
               </button>
@@ -704,6 +720,13 @@
               <p class="text-xs text-slate-400">Pengaturan Rak, Bin dan Zona.</p>
             </div>
             <div class="flex items-center gap-2">
+              <button onclick="downloadTemplateLokasi()" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                <i class="fas fa-file-arrow-down"></i> Unduh Template
+              </button>
+              <label class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                <i class="fas fa-file-import"></i> Impor Excel
+                <input type="file" accept=".xlsx,.xls" class="hidden" onchange="handleImportLokasi(event)">
+              </label>
               <button onclick="openModalLokasi()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                 <i class="fas fa-plus"></i> Tambah Lokasi
               </button>
@@ -2314,6 +2337,153 @@
           `;
           tbody.appendChild(tr);
         });
+    }
+
+    // ================= IMPOR EXCEL: BARANG, SUPLIER, LOKASI =================
+
+    function downloadTemplateBarang() {
+      const rows = [
+        ["Kode", "Nama Bahan Kemas", "Kategori Kemasan", "Satuan", "Min Stok", "Stok Terkini", "Lokasi Default"],
+        ["BK-CONTOH-01", "Contoh: Botol Kaca 100ml", "Kemasan Primer", "Pcs", 100, 500, "RAK-A1"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:16},{wch:28},{wch:20},{wch:10},{wch:10},{wch:12},{wch:16}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template Barang");
+      XLSX.writeFile(wb, "Template_Impor_Data_Barang.xlsx");
+    }
+
+    function downloadTemplateSuplier() {
+      const rows = [
+        ["Kode", "Nama Suplier", "PIC", "Telepon", "Email", "Alamat"],
+        ["SUP-CONTOH-01", "Contoh: PT Sumber Kemas", "Nama PIC", "0812-0000-0000", "email@contoh.com", "Alamat lengkap suplier"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:16},{wch:28},{wch:18},{wch:16},{wch:22},{wch:32}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template Suplier");
+      XLSX.writeFile(wb, "Template_Impor_Data_Suplier.xlsx");
+    }
+
+    function downloadTemplateLokasi() {
+      const rows = [
+        ["Kode", "Nama Rak/Lokasi", "Zona", "Kapasitas", "Keterangan"],
+        ["RAK-CONTOH-01", "Contoh: Rak Kemas Primer", "Zona Primer", "10 Pallet", "Catatan tambahan"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{wch:16},{wch:26},{wch:18},{wch:14},{wch:30}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template Lokasi");
+      XLSX.writeFile(wb, "Template_Impor_Data_Lokasi.xlsx");
+    }
+
+    // Baca file Excel yang dipilih user, kembalikan array baris (tanpa header),
+    // lewat callback(rows). Baris kosong (kode & nama kosong) otomatis dilewati.
+    function readExcelFile(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const wb = XLSX.read(e.target.result, { type: 'array' });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: '' });
+          callback(rows.slice(1)); // lewati baris header
+        } catch (err) {
+          showToast('Gagal membaca file Excel: ' + err.message, 'error');
+        }
+      };
+      reader.onerror = function() {
+        showToast('Gagal membaca file.', 'error');
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function handleImportBarang(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      readExcelFile(file, (rows) => {
+        let added = 0, updated = 0, skipped = 0;
+        rows.forEach(r => {
+          const kode = String(r[0] || '').trim();
+          const nama = String(r[1] || '').trim();
+          if (!kode || !nama) { skipped++; return; }
+          const kategori = String(r[2] || '').trim() || (appDB.kategoriBarang[0] || 'Lainnya');
+          if (!appDB.kategoriBarang.includes(kategori)) appDB.kategoriBarang.push(kategori);
+          const item = {
+            kode: kode,
+            nama: nama,
+            kategori: kategori,
+            satuan: String(r[3] || 'Pcs').trim() || 'Pcs',
+            minStok: Number(r[4]) || 0,
+            stok: Number(r[5]) || 0,
+            lokasi: String(r[6] || '').trim()
+          };
+          const idx = appDB.barang.findIndex(b => b.kode.toLowerCase() === kode.toLowerCase());
+          if (idx >= 0) { appDB.barang[idx] = item; updated++; }
+          else { appDB.barang.push(item); added++; }
+        });
+        saveDB();
+        renderBarangTable();
+        addAuditLog('IMPORT_BARANG', `Impor Excel Data Barang: ${added} ditambah, ${updated} diperbarui, ${skipped} dilewati.`);
+        showToast(`Impor selesai: ${added} ditambah, ${updated} diperbarui${skipped ? ', ' + skipped + ' baris dilewati (kode/nama kosong)' : ''}.`, 'success');
+      });
+      event.target.value = '';
+    }
+
+    function handleImportSuplier(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      readExcelFile(file, (rows) => {
+        let added = 0, updated = 0, skipped = 0;
+        rows.forEach(r => {
+          const kode = String(r[0] || '').trim();
+          const nama = String(r[1] || '').trim();
+          if (!kode || !nama) { skipped++; return; }
+          const item = {
+            kode: kode,
+            nama: nama,
+            pic: String(r[2] || '').trim(),
+            telp: String(r[3] || '').trim(),
+            email: String(r[4] || '').trim(),
+            alamat: String(r[5] || '').trim()
+          };
+          const idx = appDB.suplier.findIndex(s => s.kode.toLowerCase() === kode.toLowerCase());
+          if (idx >= 0) { appDB.suplier[idx] = item; updated++; }
+          else { appDB.suplier.push(item); added++; }
+        });
+        saveDB();
+        renderSuplierTable();
+        addAuditLog('IMPORT_SUPLIER', `Impor Excel Data Suplier: ${added} ditambah, ${updated} diperbarui, ${skipped} dilewati.`);
+        showToast(`Impor selesai: ${added} ditambah, ${updated} diperbarui${skipped ? ', ' + skipped + ' baris dilewati (kode/nama kosong)' : ''}.`, 'success');
+      });
+      event.target.value = '';
+    }
+
+    function handleImportLokasi(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      readExcelFile(file, (rows) => {
+        let added = 0, updated = 0, skipped = 0;
+        rows.forEach(r => {
+          const kode = String(r[0] || '').trim();
+          const nama = String(r[1] || '').trim();
+          if (!kode || !nama) { skipped++; return; }
+          const item = {
+            kode: kode,
+            nama: nama,
+            zona: String(r[2] || '').trim(),
+            kapasitas: String(r[3] || '').trim(),
+            ket: String(r[4] || '').trim()
+          };
+          const idx = appDB.lokasi.findIndex(l => l.kode.toLowerCase() === kode.toLowerCase());
+          if (idx >= 0) { appDB.lokasi[idx] = item; updated++; }
+          else { appDB.lokasi.push(item); added++; }
+        });
+        saveDB();
+        renderLokasiTable();
+        addAuditLog('IMPORT_LOKASI', `Impor Excel Data Lokasi: ${added} ditambah, ${updated} diperbarui, ${skipped} dilewati.`);
+        showToast(`Impor selesai: ${added} ditambah, ${updated} diperbarui${skipped ? ', ' + skipped + ' baris dilewati (kode/nama kosong)' : ''}.`, 'success');
+      });
+      event.target.value = '';
     }
 
     function renderBarangTable() {
