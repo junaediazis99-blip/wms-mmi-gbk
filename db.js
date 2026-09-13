@@ -82,8 +82,7 @@
           const remoteData = snapshot.val();
           if (remoteData) {
             isRemoteUpdating = true;
-            appDB = remoteData;
-            if (!appDB.kategoriBarang) appDB.kategoriBarang = DEFAULT_DATA.kategoriBarang.slice();
+            appDB = ensureAppDBShape(remoteData);
             localStorage.setItem('WMS_MMI_DB', JSON.stringify(appDB));
             
             const lastSyncedAt = new Date();
@@ -209,6 +208,19 @@
       ]
     };
 
+    // Jaga-jaga: kalau ada bagian data (appDB) yang hilang/kosong - entah dari localStorage lama
+    // atau dari Firebase yang belum lengkap - otomatis isi dengan data bawaan (DEFAULT_DATA)
+    // supaya tidak error "undefined" saat dipakai fitur manapun.
+    function ensureAppDBShape(obj) {
+      if (!obj || typeof obj !== 'object') return DEFAULT_DATA;
+      Object.keys(DEFAULT_DATA).forEach(key => {
+        if (obj[key] === undefined || obj[key] === null) {
+          obj[key] = Array.isArray(DEFAULT_DATA[key]) ? DEFAULT_DATA[key].slice() : DEFAULT_DATA[key];
+        }
+      });
+      return obj;
+    }
+
     // ================= VERSI APLIKASI =================
     const APP_VERSION = "6.0.0";
     const savedAppVersion = localStorage.getItem('WMS_MMI_APP_VERSION');
@@ -217,7 +229,7 @@
       localStorage.setItem('WMS_MMI_APP_VERSION', APP_VERSION);
     }
 
-    let appDB = JSON.parse(localStorage.getItem('WMS_MMI_DB')) || DEFAULT_DATA;
+    let appDB = ensureAppDBShape(JSON.parse(localStorage.getItem('WMS_MMI_DB')) || DEFAULT_DATA);
     if (!appDB.users || !Array.isArray(appDB.users) || appDB.users.length === 0) appDB.users = DEFAULT_DATA.users.slice();
     if (!appDB.barang || !Array.isArray(appDB.barang) || appDB.barang.length === 0) appDB.barang = DEFAULT_DATA.barang.slice();
     if (!appDB.suplier || !Array.isArray(appDB.suplier)) appDB.suplier = DEFAULT_DATA.suplier.slice();
@@ -266,7 +278,7 @@
         wmsRef.once('value').then((snapshot) => {
           const remoteData = snapshot.val();
           if (remoteData) {
-            appDB = remoteData;
+            appDB = ensureAppDBShape(remoteData);
             localStorage.setItem('WMS_MMI_DB', JSON.stringify(appDB));
             renderAll();
             const lastSyncedAt = new Date();
