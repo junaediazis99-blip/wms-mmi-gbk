@@ -1473,7 +1473,7 @@
   <!-- ================= JAVASCRIPT APP LOGIC ================= -->
   <script>
   // Lapisan database (Firebase init, saveDB, sync, dsb) sudah dipindah ke file db.js terpisah.
-  // Pastikan db.js ini di-load lewat <script src="db.js"></script> SEBELUM blok <script> ini di HTML.
+  // Pastikan db.js ini di-load lewat tag script src="db.js" SEBELUM blok script ini di HTML.
 
     function addAuditLog(type, desc) {
       if (!currentUser) return;
