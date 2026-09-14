@@ -1613,7 +1613,7 @@
           return;
         }
         currentUser = found;
-        localStorage.setItem('WMS_MMI_USER', JSON.stringify(currentUser));
+        sessionStorage.setItem('WMS_MMI_USER', JSON.stringify(currentUser));
         addAuditLog("LOGIN", "Berhasil login ke sistem WMS");
         showToast('Login berhasil! Selamat datang, ' + found.nama, 'success');
         showApp();
@@ -1644,7 +1644,7 @@
         // data terbaru di Spreadsheet dengan data lokal yang mungkin belum ter-refresh.
         saveDB();
         currentUser = null;
-        localStorage.removeItem('WMS_MMI_USER');
+        sessionStorage.removeItem('WMS_MMI_USER');
         showLogin();
         showToast('Anda telah logout.', 'info');
       }

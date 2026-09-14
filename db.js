@@ -225,7 +225,7 @@
     const APP_VERSION = "6.0.0";
     const savedAppVersion = localStorage.getItem('WMS_MMI_APP_VERSION');
     if (savedAppVersion !== APP_VERSION) {
-      localStorage.removeItem('WMS_MMI_USER');
+      sessionStorage.removeItem('WMS_MMI_USER');
       localStorage.setItem('WMS_MMI_APP_VERSION', APP_VERSION);
     }
 
@@ -239,7 +239,7 @@
     if (!appDB.pengeluaran || !Array.isArray(appDB.pengeluaran)) appDB.pengeluaran = DEFAULT_DATA.pengeluaran.slice();
     if (!appDB.logs || !Array.isArray(appDB.logs)) appDB.logs = DEFAULT_DATA.logs.slice();
 
-    let currentUser = JSON.parse(localStorage.getItem('WMS_MMI_USER')) || null;
+    let currentUser = JSON.parse(sessionStorage.getItem('WMS_MMI_USER')) || null;
     let myChart1 = null;
     let myChart2 = null;
 
