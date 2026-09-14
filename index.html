@@ -650,8 +650,11 @@
           </div>
 
           <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="p-4 border-b border-slate-100 flex items-center gap-2 justify-between">
               <input type="text" id="filterBarangInput" onkeyup="renderBarangTable()" placeholder="Cari bahan kemas..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none w-64">
+              <select id="filterBarangKategori" onchange="renderBarangTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <option value="">Semua Kategori</option>
+              </select>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs text-slate-600">
@@ -2604,11 +2607,22 @@
 
     function renderBarangTable() {
       const q = (document.getElementById('filterBarangInput')?.value || '').toLowerCase();
+      const selKategori = document.getElementById('filterBarangKategori');
+      const kategoriFilter = selKategori?.value || '';
       const tbody = document.getElementById('barangTableBody');
       tbody.innerHTML = '';
 
+      // Isi ulang opsi dropdown kategori (jaga pilihan yang sedang aktif)
+      if (selKategori) {
+        const currentVal = selKategori.value;
+        selKategori.innerHTML = '<option value="">Semua Kategori</option>' +
+          appDB.kategoriBarang.map(k => `<option value="${k}">${k}</option>`).join('');
+        selKategori.value = appDB.kategoriBarang.includes(currentVal) ? currentVal : '';
+      }
+
       appDB.barang
         .filter(b => b.nama.toLowerCase().includes(q) || b.kode.toLowerCase().includes(q))
+        .filter(b => !kategoriFilter || b.kategori === kategoriFilter)
         .forEach((b, idx) => {
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-50 transition";
