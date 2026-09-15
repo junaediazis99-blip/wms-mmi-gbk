@@ -410,9 +410,12 @@
                 <h3 class="text-sm font-bold text-slate-800">Status Stok Real-Time Bahan Kemas</h3>
                 <p class="text-[11px] text-slate-400">Monitoring level persediaan bahan kemas</p>
               </div>
-              <div class="relative">
-                <input type="text" id="searchStockInput" onkeyup="renderStockTable()" placeholder="Cari nama / kode kemas..." class="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none w-56">
-                <i class="fas fa-search absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+              <div class="flex items-center gap-2">
+                <div class="relative">
+                  <input type="text" id="searchStockInput" onkeyup="renderStockTable()" placeholder="Cari nama / kode kemas..." class="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none w-56">
+                  <i class="fas fa-search absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+                </div>
+                <select id="filterStockKategori" onchange="renderStockTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></select>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -2431,11 +2434,22 @@
     // ================= MASTER DATA RENDERING =================
     function renderStockTable() {
       const q = (document.getElementById('searchStockInput')?.value || '').toLowerCase();
+      const selKategori = document.getElementById('filterStockKategori');
+      const kategoriFilter = selKategori?.value || '';
       const tbody = document.getElementById('stockTableBody');
       tbody.innerHTML = '';
 
+      // Isi ulang opsi dropdown kategori (jaga pilihan yang sedang aktif)
+      if (selKategori) {
+        const currentVal = selKategori.value;
+        selKategori.innerHTML = '<option value="">Semua Kategori</option>' +
+          appDB.kategoriBarang.map(k => `<option value="${k}">${k}</option>`).join('');
+        selKategori.value = appDB.kategoriBarang.includes(currentVal) ? currentVal : '';
+      }
+
       appDB.barang
         .filter(b => b.nama.toLowerCase().includes(q) || b.kode.toLowerCase().includes(q) || b.kategori.toLowerCase().includes(q))
+        .filter(b => !kategoriFilter || b.kategori === kategoriFilter)
         .forEach(b => {
           const isLow = b.stok <= b.minStok;
           const tr = document.createElement('tr');
