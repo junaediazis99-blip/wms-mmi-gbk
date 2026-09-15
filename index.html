@@ -417,6 +417,7 @@
                   <i class="fas fa-search absolute left-2.5 top-2 text-slate-400 text-xs"></i>
                 </div>
                 <select id="filterStockKategori" onchange="renderStockTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></select>
+                <select id="filterStockLokasi" onchange="renderStockTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></select>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -2437,6 +2438,8 @@
       const q = (document.getElementById('searchStockInput')?.value || '').toLowerCase();
       const selKategori = document.getElementById('filterStockKategori');
       const kategoriFilter = selKategori?.value || '';
+      const selLokasi = document.getElementById('filterStockLokasi');
+      const lokasiFilter = selLokasi?.value || '';
       const tbody = document.getElementById('stockTableBody');
       tbody.innerHTML = '';
 
@@ -2448,9 +2451,19 @@
         selKategori.value = appDB.kategoriBarang.includes(currentVal) ? currentVal : '';
       }
 
+      // Isi ulang opsi dropdown lokasi (dari master data Lokasi)
+      if (selLokasi) {
+        const currentValLok = selLokasi.value;
+        const kodeLokasiList = appDB.lokasi.map(l => l.kode);
+        selLokasi.innerHTML = '<option value="">Semua Lokasi</option>' +
+          appDB.lokasi.map(l => `<option value="${l.kode}">${l.kode} - ${l.nama}</option>`).join('');
+        selLokasi.value = kodeLokasiList.includes(currentValLok) ? currentValLok : '';
+      }
+
       appDB.barang
         .filter(b => b.nama.toLowerCase().includes(q) || b.kode.toLowerCase().includes(q) || b.kategori.toLowerCase().includes(q))
         .filter(b => !kategoriFilter || b.kategori === kategoriFilter)
+        .filter(b => !lokasiFilter || b.lokasi === lokasiFilter)
         .forEach(b => {
           const isLow = b.stok <= b.minStok;
           const tr = document.createElement('tr');
