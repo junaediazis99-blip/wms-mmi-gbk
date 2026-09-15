@@ -65,6 +65,7 @@
       100% { top: 10%; }
     }
         @media print {
+      @page { size: A4; margin: 12mm; }
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
       #printArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 10px; }
